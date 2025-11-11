@@ -1,0 +1,44 @@
+import * as Yup from 'yup,';
+
+import { v4 } from 'uuid';
+import User from '../models/User.js';
+
+class UserController {
+  async store(request, response) {
+    const schema = Yup.object({
+      name: Yup.string().required(),
+      email: Yup.string().email().required,
+      password: Yup.string().min(6).required(),
+      admin: Yup.boolean(),
+    });
+    try {
+      schema.validateSync(request.body, { abortEarly: false, strict: true });
+    } catch (err) {
+      console.log(err);
+      return response.status(400).json({ error: err.erros });
+    }
+
+    const { name, email, password_hash, admin } = request.body;
+
+    const existingUser = await User.findOne({
+      where: {
+        email,
+      },
+    });
+    if (existingUser) {
+      return response.status(400).json({ message: ' e-mail already taken' });
+    }
+
+    const user = await User.create({
+      id: v4(),
+      name,
+      email,
+      password_hash,
+      admin,
+    });
+
+    return response.status(201).json(user);
+  }
+}
+
+export default new UserController();
