@@ -1,24 +1,26 @@
-import * as Yup from 'yup,';
 
+import bcrypt from 'bcrypt'
 import { v4 } from 'uuid';
-import User from '../models/User.js';
+import * as Yup from 'yup';
+import User from '../User.js';
 
 class UserController {
   async store(request, response) {
     const schema = Yup.object({
       name: Yup.string().required(),
-      email: Yup.string().email().required,
+      email: Yup.string().email().required(),
       password: Yup.string().min(6).required(),
       admin: Yup.boolean(),
-    });
+    }).strict(true);
+
     try {
       schema.validateSync(request.body, { abortEarly: false, strict: true });
     } catch (err) {
       console.log(err);
-      return response.status(400).json({ error: err.erros });
+      return response.status(400).json({ error: err.errors });
     }
 
-    const { name, email, password_hash, admin } = request.body;
+    const { name, email, password, admin } = request.body;
 
     const existingUser = await User.findOne({
       where: {
@@ -29,6 +31,9 @@ class UserController {
       return response.status(400).json({ message: ' e-mail already taken' });
     }
 
+    const password_hash = await bcrypt.hash(password, 10);
+
+
     const user = await User.create({
       id: v4(),
       name,
@@ -37,7 +42,13 @@ class UserController {
       admin,
     });
 
-    return response.status(201).json(user);
+    return response.status(201).json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      admin: user.admin
+    });
+
   }
 }
 

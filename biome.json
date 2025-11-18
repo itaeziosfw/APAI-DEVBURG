@@ -17,6 +17,11 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "complexity": {
+        "noThisInStatic": "off",
+        "useOptionalChain": "off"
+      },
+
       "correctness": {
         "noUnusedImports": "off"
       }

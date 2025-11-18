@@ -1,9 +1,9 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { DataTypes, Model } from 'sequelize';
 
 class User extends Model {
   static init(sequelize) {
-    // biome-ignore lint/complexity/noThisInStatic: permitido no Sequelize
+
     super.init(
       {
         id: {
@@ -36,11 +36,13 @@ class User extends Model {
         tableName: 'users',
       }
     );
+    return this;
   }
 
-  // Método auxiliar opcional — verificar senha no login
+
   checkPassword(password) {
     return bcrypt.compare(password, this.password_hash);
+
   }
 }
 
